@@ -56,7 +56,6 @@ void startExecution(){
 		i = 0;
 		instrCode = mem[*PC];
 		(*PC)++;
-		cout << "instrCode = " << instrCode;
 		switch(instrCode){
 	//MOV
 		case 55: //register to register
@@ -329,7 +328,6 @@ void startExecution(){
 			break;
 		}
 		(*PC)++;
-		cout << "\nPCend =" << (*PC);
 		displayCPUState();
 	}
 
@@ -428,25 +426,7 @@ void init(){
 
 
 }
-//Bitwise Multiplication
-unsigned int multiplication(unsigned int TempA, unsigned int TempB)
-{
-	unsigned int mask, TempC = 0;
 
-	while(TempB != 0)
-    {
-		mask = 1;
-		mask = mask & TempB;
-
-		if(mask)
-			TempC = add(TempA + TempC);
-
-		TempA = TempA << 1;
-        TempB = TempB >> 1;
-    }
-
-	return TempC;
-}
 int ADD(int x, int y)
 {
 	cout << "Adding x= " << x << " y = " << y;
@@ -514,7 +494,6 @@ void POP(){
 	mem[instrMap["MDR"]] = mem[stack_pointer];
 }
 
-
 int main() {
 	init();
 	displayCPUState();
@@ -526,20 +505,32 @@ int main() {
 
     printf("Memory: ");
 
-    for(int i=0; i<10; i++)
+	for(int i=0; i<36; i++)
 	{
-		if(i%3 == 0)
-			cout << "\n";
-		cout << codeSegment[i] << " ";
-	}
+			cout << "\nLoc " << i << " = " << mem[i] << "\t" ;
 
-	for(int i=0; i<50; i++)
-	{
-			cout << "\nLoc " << i << " = " << mem[i] ;
+
 	}
+	//Reister and instructions in Big endian
+	cout << "\nRegisters and Instructions in Big endian";
+	for(int i=36; i>=0; i-=2)
+	{
+		printf("\n0x%3x: %02x", i, mem[i]);
+		printf(" %02x", mem[i]);
+	}
+	//Stack data
+	cout << "\n\nStack data";
 	for(int i=1015; i<1024; i++)
 	{
 			cout << "\nLoc " << i << " = " << mem[i] ;
+	}
+
+	//Stack memory in Big endian
+	cout << "\n\nStack memory in Big endian";
+	for(int i=1023; i>=1015; i--)
+	{
+		printf("\n0x%3x: %02x", i, mem[i]);
+		printf(" %02x", mem[i]);
 	}
 	cout << "\n********Terminated*********";
 	return 0;

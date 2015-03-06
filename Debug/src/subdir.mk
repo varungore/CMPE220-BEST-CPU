@@ -4,15 +4,12 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/best_cpu.cpp \
 ../src/t3.cpp 
 
 OBJS += \
-./src/best_cpu.o \
 ./src/t3.o 
 
 CPP_DEPS += \
-./src/best_cpu.d \
 ./src/t3.d 
 
 
