@@ -7,6 +7,9 @@ int MUL(int, int);
 int SUB(int, int);
 int DIV(int, int);
 int MOD(int, int);
+void POP();
+void PUSH(int);
+int stack_pointer = 1023;//last memory word in main memory(bottom up stack)
 std::map<std::string, int> instrMap;
 
 std::map<std::string, int> refLocationMap;

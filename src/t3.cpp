@@ -63,13 +63,10 @@ void startExecution(){
 			//Source
 			mem[instrMap["MDR"]] = mem[mem[*PC]];
 			mem[instrMap["MAR"]] = instrMap["MDR"];
-			cout << mem[instrMap["MAR"]];
-			cout << "\n" << mem[instrMap["MDR"]];
 			(*PC)++;
 
 			//Destination
 			mem[mem[*PC]] = mem[mem[instrMap["MAR"]]];
-			cout << "PC = " << mem[mem[*PC]];
 			break;
 
 		case 56: //Constant to a register
@@ -82,7 +79,7 @@ void startExecution(){
 			mem[mem[*PC]] = mem[mem[instrMap["MAR"]]];
 			break;
 
-		case 57:
+		case 57: //Contant to address referenced by reg
 			//Source
 			mem[instrMap["MDR"]] = mem[*PC];
 			mem[instrMap["MAR"]] = instrMap["MDR"];
@@ -92,7 +89,7 @@ void startExecution(){
 			mem[mem[mem[*PC]]] = mem[mem[instrMap["MAR"]]];
 			break;
 
-		case 58:
+		case 58: //Referenced by register to referenced by register
 			//Source
 			mem[instrMap["MAR"]] = mem[mem[mem[*PC]]];
 			(*PC)++;
@@ -105,7 +102,7 @@ void startExecution(){
 		case 65: //register to register
 			//Source
 			mem[instrMap["MDR"]] = mem[mem[*PC]];
-			mem[instrMap["MAR"]] = instrMap["MDR"];
+			mem[instrMap["MAR"]] = mem[instrMap["MDR"]];
 			(*PC)++;
 
 			//Add and save the result at Destination
@@ -119,6 +116,7 @@ void startExecution(){
 			(*PC)++;
 
 			//Destination
+			cout << mem[mem[instrMap["MAR"]]] << "  " <<mem[mem[*PC]] ;
 			mem[mem[*PC]] = ADD(mem[mem[instrMap["MAR"]]], mem[mem[*PC]]);
 			break;
 
@@ -298,9 +296,40 @@ void startExecution(){
 			//Destination
 			mem[mem[mem[*PC]]] = ADD(mem[mem[instrMap["MAR"]]], mem[mem[mem[*PC]]]);
 			break;
+	//PUSH
+		case 115: //register to stack
+			//Source
+			mem[instrMap["MDR"]] = mem[mem[*PC]];
+			mem[instrMap["MAR"]] = instrMap["MDR"];
+
+			//Push value to stack
+			PUSH(mem[mem[instrMap["MAR"]]]);
+			break;
+
+		case 116: //Constant to a register
+			//Source
+			mem[instrMap["MDR"]] = mem[*PC];
+			mem[instrMap["MAR"]] = instrMap["MDR"];
+
+			//Push value to stack
+			PUSH(mem[mem[instrMap["MAR"]]]);
+			break;
+
+		case 117:
+			//Source
+			mem[instrMap["MDR"]] = mem[*PC];
+			mem[instrMap["MAR"]] = instrMap["MDR"];
+
+			//Push value to stack
+			PUSH(mem[mem[instrMap["MAR"]]]);
+			break;
+	//POP
+		case 125:
+			POP();
+			break;
 		}
 		(*PC)++;
-		cout << "PCend =" << (*PC)++;
+		cout << "\nPCend =" << (*PC);
 		displayCPUState();
 	}
 
@@ -364,6 +393,11 @@ void init(){
 	instrMap["MODCR"] = 107;//Contant to address referenced by reg
 	instrMap["MODR"] = 108;//Move value at location referenced by a reg to location referenced by reg
 
+	instrMap["PUSH"] = 115; // Register value to stack
+	instrMap["PUSHC"] = 116; // Constant value to stack
+	instrMap["PUSHR"] = 117; // Value referenced by register to stack
+
+	instrMap["POP"] = 125;// Pop value to MDR
 
 	instrMap["%ecx"] = 1;
 	instrMap["%edx"] = 2;
@@ -394,16 +428,35 @@ void init(){
 
 
 }
+//Bitwise Multiplication
+unsigned int multiplication(unsigned int TempA, unsigned int TempB)
+{
+	unsigned int mask, TempC = 0;
 
+	while(TempB != 0)
+    {
+		mask = 1;
+		mask = mask & TempB;
+
+		if(mask)
+			TempC = add(TempA + TempC);
+
+		TempA = TempA << 1;
+        TempB = TempB >> 1;
+    }
+
+	return TempC;
+}
 int ADD(int x, int y)
 {
+	cout << "Adding x= " << x << " y = " << y;
   do
   {
     x=x^y;
     y=(x^y)&y;
     y=y<<1;
   } while(y);
-
+  cout << "\nResult :" << x;
    return(x);
 }
 
@@ -446,6 +499,20 @@ int MOD(int x, int y)
 	return m;
 }
 
+void PUSH(int value){
+
+	mem[stack_pointer] = value;
+	stack_pointer--;
+}
+
+void POP(){
+	if(stack_pointer >= 1023){
+		stack_pointer = 1023;
+		return;
+	}
+	stack_pointer++;
+	mem[instrMap["MDR"]] = mem[stack_pointer];
+}
 
 
 int main() {
@@ -470,7 +537,10 @@ int main() {
 	{
 			cout << "\nLoc " << i << " = " << mem[i] ;
 	}
-
+	for(int i=1015; i<1024; i++)
+	{
+			cout << "\nLoc " << i << " = " << mem[i] ;
+	}
 	cout << "\n********Terminated*********";
 	return 0;
 }
