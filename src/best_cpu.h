@@ -19,4 +19,4 @@ string input;
 int mem[1024] = { 0 };//0-19 reserved for registers disscuss*
 int *PC;
 string codeSegment[1024] = { "" };
-int flag = 0;
+int overflow_flag = 0;

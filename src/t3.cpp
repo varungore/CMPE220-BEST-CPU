@@ -7,6 +7,7 @@
 //============================================================================
 
 #include <iostream>
+#include<limits.h>
 using namespace std;
 #include <string.h>
 #include <stdio.h>
@@ -100,12 +101,14 @@ void startExecution(){
 	//ADD
 		case 65: //register to register
 			//Source
-			mem[instrMap["MDR"]] = mem[mem[*PC]];
+			mem[instrMap["MDR"]] = mem[*PC];
 			mem[instrMap["MAR"]] = mem[instrMap["MDR"]];
 			(*PC)++;
 
 			//Add and save the result at Destination
+			cout << mem[instrMap["MAR"]];
 			mem[mem[*PC]] = ADD(mem[mem[instrMap["MAR"]]], mem[mem[*PC]]);
+
 			break;
 
 		case 66: //Constant to a register
@@ -141,7 +144,7 @@ void startExecution(){
 	//SUBTRACT
 		case 75: //register to register
 			//Source
-			mem[instrMap["MDR"]] = mem[mem[*PC]];
+			mem[instrMap["MDR"]] = mem[*PC];
 			mem[instrMap["MAR"]] = instrMap["MDR"];
 			(*PC)++;
 
@@ -181,7 +184,7 @@ void startExecution(){
 	//DIVIDE
 		case 85: //register to register
 			//Source
-			mem[instrMap["MDR"]] = mem[mem[*PC]];
+			mem[instrMap["MDR"]] = mem[*PC];
 			mem[instrMap["MAR"]] = instrMap["MDR"];
 			(*PC)++;
 
@@ -220,7 +223,7 @@ void startExecution(){
 	//MUL
 		case 95: //register to register
 			//Source
-			mem[instrMap["MDR"]] = mem[mem[*PC]];
+			mem[instrMap["MDR"]] = mem[*PC];
 			mem[instrMap["MAR"]] = instrMap["MDR"];
 			(*PC)++;
 
@@ -259,7 +262,7 @@ void startExecution(){
 	//MOD
 		case 105: //register to register
 			//Source
-			mem[instrMap["MDR"]] = mem[mem[*PC]];
+			mem[instrMap["MDR"]] = mem[*PC];
 			mem[instrMap["MAR"]] = instrMap["MDR"];
 			(*PC)++;
 
@@ -298,7 +301,7 @@ void startExecution(){
 	//PUSH
 		case 115: //register to stack
 			//Source
-			mem[instrMap["MDR"]] = mem[mem[*PC]];
+			mem[instrMap["MDR"]] = mem[*PC];
 			mem[instrMap["MAR"]] = instrMap["MDR"];
 
 			//Push value to stack
@@ -351,7 +354,7 @@ void displayCPUState(){
 
     printf("PC: %d ",*PC);
 
-    printf("FLAG: %d \n",flag);
+    printf("OVERFLOW FLAG: %d \n",overflow_flag);
 
 
 
@@ -430,14 +433,17 @@ void init(){
 int ADD(int x, int y)
 {
 	cout << "Adding x= " << x << " y = " << y;
-  do
-  {
-    x=x^y;
-    y=(x^y)&y;
-    y=y<<1;
-  } while(y);
-  cout << "\nResult :" << x;
-   return(x);
+	if( x > INT_MAX - y){
+		overflow_flag = 1;
+	}
+	do
+	{
+		x=x^y;
+		y=(x^y)&y;
+		y=y<<1;
+	} while(y);
+
+  return(x);
 }
 
 int SUB(int x, int y)
@@ -447,10 +453,11 @@ int SUB(int x, int y)
 
 int MUL(int x, int y)
 {
+	int z = y;
   int n = x;
-  while (n)
+  while (n>1)
   {
-    x = ADD(x, y);
+    y = ADD(y, z);
     n = SUB(n, 1);
   }
   return y;
@@ -464,19 +471,19 @@ int DIV(int x, int y)
     x = SUB(x, y);
     n = ADD(n, 1);
   }
+  n = ADD(n,1);
   return n;
 }
 
 int MOD(int x, int y)
 {
-	//Compute modulus division by 1 << s without a division operator
-
-	unsigned int n;          // numerator
-	unsigned int s;
-	const unsigned int d = 1U << s; // So d will be one of: 1, 2, 4, 8, 16, 32, ...
-	unsigned int m;                // m will be n % d
-	m = n & (d - 1);
-	return m;
+	  int n = 0;
+	  while (x > y)
+	  {
+	    x = SUB(x, y);
+	    n = ADD(n, 1);
+	  }
+	  return x;
 }
 
 void PUSH(int value){
@@ -495,6 +502,7 @@ void POP(){
 }
 
 int main() {
+	cout << INT_MAX;
 	init();
 	displayCPUState();
 	cout << "\nEnter instructions..." << endl;
