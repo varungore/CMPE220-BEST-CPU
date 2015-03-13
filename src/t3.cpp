@@ -329,6 +329,33 @@ void startExecution(){
 		case 125:
 			POP();
 			break;
+	//LEA
+		case 130: //register to register
+			//Source
+			mem[instrMap["MDR"]] = mem[mem[*PC]];
+			mem[instrMap["MAR"]] = instrMap["MDR"];
+			(*PC)++;
+
+			//Destination
+			mem[mem[*PC]] = mem[mem[instrMap["MAR"]]];
+			break;
+	//JUMP
+		case 135: //J : unconditional jump
+			//Destination address
+			(*PC) = mem[mem[*PC]] - 1;
+			break;
+		case 136: //JZ : cmp first two values and jump to address in third parameter(register)
+			if(mem[mem[*PC]] - mem[mem[(*PC)+1]] == 0)
+				(*PC) = mem[mem[(*PC)+2]] - 1;
+			else
+				(*PC)+=2;
+			break;
+		case 137: //JNZ : cmp first two values and jump to address in third parameter(register)
+			if(mem[mem[*PC]] - mem[mem[(*PC)+1]] != 0)
+				(*PC) = mem[mem[(*PC)+2]] - 1;
+			else
+				(*PC)+=2;
+			break;
 		}
 		(*PC)++;
 		displayCPUState();
@@ -400,6 +427,12 @@ void init(){
 
 	instrMap["POP"] = 125;// Pop value to MDR
 
+	instrMap["LEA"] = 130;
+
+	instrMap["J"] = 135;
+	instrMap["JZ"] = 136;
+	instrMap["JNZ"] = 137;
+	instrMap["LEA"] = 86;//Constant to a reg
 	instrMap["%ecx"] = 1;
 	instrMap["%edx"] = 2;
 	instrMap["%ebx"] = 3;
@@ -499,6 +532,10 @@ void POP(){
 	}
 	stack_pointer++;
 	mem[instrMap["MDR"]] = mem[stack_pointer];
+}
+
+void LEA(){
+
 }
 
 int main() {
